@@ -16,28 +16,22 @@ export function cleanInput(input: string): string[] {
 
 export async function startREPL(state: State) {
     const repl = state.readline;
-
     repl.prompt();
-
     repl.on("line", async (input: string) => {
         const cleaned = cleanInput(input);
-
         if (cleaned.length === 0) {
             repl.prompt()
         } else {
             const inputCommand = cleaned[0];
-
+            const args = cleaned.slice(1);
             const availableCommand = state.commands;
-
             const command = availableCommand[inputCommand];
-
             if (command) {
                 try {
-                await command.callback(state);
-
+                await command.callback(state, ...args);
                 } catch (err) {
                     if (err instanceof Error)
-                    console.log(err.message);
+                    console.log(`An error has occured: ${err.message}`);
                     else {
                         console.log("Unknown Error")
                     }
@@ -45,9 +39,7 @@ export async function startREPL(state: State) {
             } else {
                 console.log("Unknown command. Try 'help'");
             }
-
             repl.prompt();
         }
-
     })
 }
